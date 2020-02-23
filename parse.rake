@@ -1,4 +1,3 @@
-
 task :parse, [:file] => :environment do |_, args|
   begin
     parsing = LogParsing.new(args[:file])

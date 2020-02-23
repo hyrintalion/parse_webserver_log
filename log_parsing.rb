@@ -1,25 +1,20 @@
 class LogParsing
-
   class FileContentError < StandardError; end
 
   attr_reader :content
 
   def initialize(file)
-    @content = fetch_file_content file
+    @content = fetch_file_content(file)
   end
 
   def webpages_with_most_page_views
-    visits = number_of_visits(file_content)
-    sorted_visits = sort_by_visits(visits)
-
-    sorted_visits
+    visits = number_of_visits(content)
+    sort_by_visits(visits)
   end
 
   def webpages_with_most_unique_page_views
     visits = number_of_visits(content.uniq)
-    sorted_uniq_visits = sort_by_visits(visits)
-
-    sorted_uniq_visits
+    sort_by_visits(visits)
   end
 
   private
@@ -27,19 +22,23 @@ class LogParsing
   def fetch_file_content(file)
     result = []
     content = File.new(file)
-    content.each_line { |line|
+
+    content.each_line do |line|
       arr = line.split(' ')
+
       if arr.count == 2 && is_webpage(arr[0]) && is_ip(arr[1])
         result << {webpage: arr[0], ip: arr[1]}
       else
         raise FileContentError
       end
-    }
+    end
+
     result
   end
 
   def number_of_visits(file_content)
     result = {}
+
     file_content.each do |line|
       webpage = line[:webpage]
       unless result[webpage]
@@ -48,6 +47,7 @@ class LogParsing
         result[webpage] += 1
       end
     end
+
     result
   end
 

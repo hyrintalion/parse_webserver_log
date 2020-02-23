@@ -18,9 +18,9 @@ describe LogParsing do
     end
     let(:result_number_of_visits) do
       {
-        '/home' => 3,
+        '/about/2' => 1,
         '/contact' => 2,
-        '/about/2' => 1
+        '/home' => 3
       }
     end
     let(:sorted_result_number_of_visits) do
@@ -32,9 +32,9 @@ describe LogParsing do
     end
     let(:result_number_of_uniq_visits) do
       {
+        '/about/2' => 1,
         '/home' => 2,
-        '/contact' => 2,
-        '/about/2' => 1
+        '/contact' => 2
       }
     end
     let(:sorted_result_number_of_uniq_visits) do
@@ -56,7 +56,27 @@ describe LogParsing do
 
     it 'sort number_of_visits' do
       result = subject.send(:sort_by_visits, result_number_of_visits)
-      expect(result).to eq result_number_of_visits
+      expect(result).to eq sorted_result_number_of_visits
+    end
+
+    it 'then we count number_of_visits, result have hash with numbers' do
+      result = subject.send(:number_of_visits, parsed_file_content.uniq)
+      expect(result).to eq result_number_of_uniq_visits
+    end
+
+    it 'sort number_of_uniq_visits' do
+      result = subject.send(:sort_by_visits, result_number_of_uniq_visits)
+      expect(result).to eq sorted_result_number_of_uniq_visits
+    end
+
+    it 'webpages_with_most_page_views ' do
+      result = subject.webpages_ordered_by_views
+      expect(result).to eq sorted_result_number_of_visits
+    end
+
+    it 'webpages_with_most_page_views ' do
+      result = subject.webpages_ordered_by_uniq_views
+      expect(result).to eq sorted_result_number_of_uniq_visits
     end
   end
 
@@ -73,17 +93,17 @@ describe LogParsing do
       let(:file) { 'spec/wrong_test_webserver.log' }
 
       it 'wrong content' do
-        allow(File).to receive(:new).and_return('/sdfhomdfgsdfg4.123.665.067gs fgfdbzncvbnx vbdfgsxdfghdfghh')
+        allow(File).to receive(:new).and_return('wrong format of content')
         expect { subject }.to raise_error(LogParsing::FileContentError)
       end
 
       it 'wrong webpage' do
-        allow(File).to receive(:new).and_return('184.123.665.067 /home')
+        allow(File).to receive(:new).and_return('184123665067 184.123.665.067')
         expect { subject }.to raise_error(LogParsing::FileContentError)
       end
 
       it 'wrong ip' do
-        allow(File).to receive(:new).and_return('/sdfhomdfgsdd fg4.123.665.067')
+        allow(File).to receive(:new).and_return('/sdfhomdfgsdd 1.2.3.4')
         expect { subject }.to raise_error(LogParsing::FileContentError)
       end
     end

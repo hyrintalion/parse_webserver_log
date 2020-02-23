@@ -7,12 +7,12 @@ class LogParsing
     @content = fetch_file_content(file)
   end
 
-  def webpages_with_most_page_views
+  def webpages_ordered_by_views
     visits = number_of_visits(content)
     sort_by_visits(visits)
   end
 
-  def webpages_with_most_unique_page_views
+  def webpages_ordered_by_uniq_views
     visits = number_of_visits(content.uniq)
     sort_by_visits(visits)
   end

@@ -1,26 +1,43 @@
+#!/usr/bin/ruby
 require_relative 'log_parsing'
 
 # parse.rb
 def parse(file)
-  parsing = LogParsing.new(args[:file])
+  parsing = LogParsing.new(file)
 
-  parsing.webpages_ordered_by_views.each_with_index do |webpage, visits|
+  puts 'List of webpages with most page views ordered from most pages views to less page views:'
+  parsing.webpages_ordered_by_views.each do |webpage, visits|
     if visits == 1
-      p "#{webpage.to_s} #{visits} visit"
+      puts "#{webpage} #{visits} visit"
     else
-      p "#{webpage} #{visits} visits"
+      puts "#{webpage} #{visits} visits"
     end
   end
 
-  parsing.webpages_ordered_by_uniq_views.each_with_index do |webpage, visits|
+  puts 'List of webpages with most unique page views ordered from most pages views to less page views:'
+  parsing.webpages_ordered_by_uniq_views.each do |webpage, visits|
     if visits == 1
-      p "#{webpage} #{visits} unique view"
+      puts "#{webpage} #{visits} unique view"
     else
-      p "#{webpage} #{visits} unique views"
+      puts "#{webpage} #{visits} unique views"
     end
   end
+  return 0
 rescue Errno::ENOENT
-  p 'File not found'
+  puts 'File not found'
+  return 2
 rescue LogParsing::FileContentError
-  p 'File have incorrect structure'
+  puts 'File have incorrect structure'
+  return 3
 end
+
+def run
+  if ARGV.empty?
+    puts 'Please set filename.'
+    return 1
+  else
+    parse(ARGV[0])
+  end
+end
+
+run()

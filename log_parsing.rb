@@ -62,6 +62,6 @@ class LogParsing
   def is_ip(ip)
     # I don't do the real regular extention, because in webserver.log file we have wrong ip like 646.865.545.408
     # I will take it for the right case and verify only structure
-    ip.match(/[0-9]{3}.[0-9]{3}.[0-9]{3}.[0-9]{3}/)
+    ip.match(/\d{3}.\d{3}.\d{3}.\d{3}/)
   end
 end

@@ -1,59 +1,51 @@
 class LogParsing
 
-  attr_reader :file, :content
+  attr_reader :content
 
   def initialize(file)
-    @file = file
-    @content = fetch_file_content
+    @content = fetch_file_content file
   end
 
   def webpages_with_most_page_views
-    # Нужно вернуть список вебстраниц с количеством просмотров от большего к меньшему
-    #
-    # Для этого надо:
-    #
-    # 1. Предположительно этим будет заниматься fetch_file_content
-    # получить массив хешей вида
-    # [{ webpage: '/help_page/1', ip: '126.318.035.038'}{ webpage: '/contact', ip: '184.123.665.067'}]
-    #
-    # 2. Сделать each, который будет считать количество просмотров и складывать это в отдельный хеш вида
-    # [{webpage: '/home', visits: 90}{webpage: '/index', visits: 80}]
-    #
-    # 3. Отсортировать по возрастанию по полю visits
-    #
-    # 4. Вывести это все в виде
-    #
-    # /home 90 visits
-    # /index 80 visits
+    visits = number_of_visits(file_content)
+    sorted_visits = sort_by_visits(visits)
 
+    sorted_visits
   end
 
   def webpages_with_most_unique_page_views
-    # Нужно вернуть список вебстраниц с УНИКАЛЬНЫМ количеством просмотров от большего к меньшему
-    #
-    # Для этого надо:
-    #
-    # 1. Предположительно этим будет заниматься fetch_file_content
-    # получить массив хешей вида
-    # [{ webpage: '/help_page/1', ip: '126.318.035.038'}{ webpage: '/contact', ip: '184.123.665.067'}]
-    #
-    # 2. Отсечь повторяющиеся ip
-    #
-    # 3. Сделать each, который будет считать количество просмотров и складывать это в отдельный хеш вида
-    # [{webpage: '/home', visits: 90}{webpage: '/index', visits: 80}]
-    #
-    # 4. Отсортировать по возрастанию по полю visits
-    #
-    # 5. Вывести это все в виде
-    #
-    # /home 90 unique views
-    # /index 80 unique views
+    visits = number_of_visits(content.uniq)
+    sorted_uniq_visits = sort_by_visits(visits)
+
+    sorted_uniq_visits
   end
 
   private
 
-  def fetch_file_content
-    # получить массив хешей вида
-    # [{ webpage: '/help_page/1', ip: '126.318.035.038'}{ webpage: '/contact', ip: '184.123.665.067'}]
+  def fetch_file_content(file)
+    result = []
+    content = File.new(file)
+    content.each_line { |line|
+      arr = line.split(' ')
+      result << {webpage: arr.first, ip: arr.last}
+    }
+    result
+  end
+
+  def number_of_visits(file_content)
+    result = {}
+    file_content.each do |line|
+      webpage = line[:webpage]
+      unless result[webpage]
+        result[webpage] = 1
+      else
+        result[webpage] += 1
+      end
+    end
+    result
+  end
+
+  def sort_by_visits(visits)
+    visits.sort_by {|k, v| v}.reverse.to_h
   end
 end

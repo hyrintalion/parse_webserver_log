@@ -2,6 +2,8 @@ require_relative '../log_parsing'
 require 'rspec'
 
 describe LogParsing do
+  subject {described_class.new(file)}
+
   context 'happy path' do
     let(:file) { 'spec/test_webserver.log' }
     let(:parsed_file_content) do
@@ -43,8 +45,6 @@ describe LogParsing do
       }
     end
 
-    subject {described_class.new(file)}
-
     it 'then initialize, content have array of hashes' do
       expect(subject.content).to eq parsed_file_content
     end
@@ -58,15 +58,35 @@ describe LogParsing do
       result = subject.send(:sort_by_visits, result_number_of_visits)
       expect(result).to eq result_number_of_visits
     end
+  end
 
-    it 'should return text about visits' do
-      expect { subject.webpages_with_most_page_views }.
-        to output( "\"[\\\"/home\\\", 3] 0 visits\"\n\"[\\\"/contact\\\", 2] 1 visit\"\n\"[\\\"/about/2\\\", 1] 2 visits\"\n").to_stdout
+  context 'errors' do
+    context 'file doesn`t exists' do
+      let(:file) { 'spec/i_am_not_here.log' }
+
+      it 'then initialize, raise error' do
+        expect { subject }.to raise_error(Errno::ENOENT)
+      end
     end
 
-    it 'should return text about unique visits' do
-      expect { subject.webpages_with_most_unique_page_views }.
-        to output("\"[\\\"/contact\\\", 2] 0 unique views\"\n\"[\\\"/home\\\", 2] 1 unique view\"\n\"[\\\"/about/2\\\", 1] 2 unique views\"\n").to_stdout
+    context 'file with wrong content' do
+      let(:file) { 'spec/wrong_test_webserver.log' }
+
+      it 'wrong content' do
+        allow(File).to receive(:new).and_return('/sdfhomdfgsdfg4.123.665.067gs fgfdbzncvbnx vbdfgsxdfghdfghh')
+        expect { subject }.to raise_error(LogParsing::FileContentError)
+      end
+
+      it 'wrong webpage' do
+        allow(File).to receive(:new).and_return('184.123.665.067 /home')
+        expect { subject }.to raise_error(LogParsing::FileContentError)
+      end
+
+      it 'wrong ip' do
+        allow(File).to receive(:new).and_return('/sdfhomdfgsdd fg4.123.665.067')
+        expect { subject }.to raise_error(LogParsing::FileContentError)
+      end
     end
+
   end
 end

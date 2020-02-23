@@ -1,5 +1,7 @@
 class LogParsing
 
+  class FileContentError < StandardError; end
+
   attr_reader :content
 
   def initialize(file)
@@ -27,7 +29,11 @@ class LogParsing
     content = File.new(file)
     content.each_line { |line|
       arr = line.split(' ')
-      result << {webpage: arr.first, ip: arr.last}
+      if arr.count == 2 && is_webpage(arr[0]) && is_ip(arr[1])
+        result << {webpage: arr[0], ip: arr[1]}
+      else
+        raise FileContentError
+      end
     }
     result
   end
@@ -47,5 +53,15 @@ class LogParsing
 
   def sort_by_visits(visits)
     visits.sort_by {|k, v| v}.reverse.to_h
+  end
+
+  def is_webpage(webpage)
+    webpage.chars.first == '/'
+  end
+
+  def is_ip(ip)
+    # I don't do the real regular extention, because in webserver.log file we have wrong ip like 646.865.545.408
+    # I will take it for the right case and verify only structure
+    ip.match(/[0-9]{3}.[0-9]{3}.[0-9]{3}.[0-9]{3}/)
   end
 end
